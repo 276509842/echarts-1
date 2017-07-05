@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>省馆</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="header empty">
+    Header
+  </div>
+  <div class="container">
+    <div class="nav empty">分类</div>
+    <div id="map-china"></div>
+    <div id="map-province"></div>
+    <div class="back">返回中国地图</div>
+  </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="echarts.min.js"></script>
+<script>
+// 显示中国地图
+function showChina(){
+  let chart = echarts.init(document.getElementById('map-china'))
+  $('.back').hide()
+  $('#map-china').show()
+  $('#map-province').hide()
+  // 配置项
+  var options1 = {
+    series: [{
+      type: 'map',
+      map:'china',
+      roam:false,
+      zoom:1.2,
+      label: {
+        normal: {
+          show: true,
+          textStyle:{
+            color:"#999"
+          }
+        },   
+        emphasis: {
+          show: true,
+          textStyle:{
+            color:"#fff"
+          }
+        } 
+      },
+      itemStyle: {
+        normal: {
+          borderWidth: .5,
+          borderColor: '#555',
+          areaColor:"#323c48"
+        },
+        emphasis: {
+          borderWidth: .5,
+          borderColor: '',
+          areaColor:"#2a333d"
+        }
+      }
+    }]
+  }
+  $.get('/json/china-fixed.json',function(chinaJson){
+    echarts.registerMap('china', chinaJson)
+    chart.setOption(options1);
+    chart.on('click', function (params) {
+      var name = (params.name == "") ? "error" :(params.name)
+      showProvince(name)
+    });
+  })
+}
+// 显示省地图
+function showProvince(provinceName) {
+  let chart = echarts.init(document.getElementById('map-province'))
+  $('.back').show()
+  $('#map-china').hide()
+  $('#map-province').show()
+  var provinces = ['shanghai', 'hebei','shanxi','neimenggu','liaoning','jilin','heilongjiang','jiangsu','zhejiang','anhui','fujian','jiangxi','shandong','henan','hubei','hunan','guangdong','guangxi','hainan','sichuan','guizhou','yunnan','xizang','shanxi1','gansu','qinghai','ningxia','xinjiang', 'beijing', 'tianjin', 'chongqing', 'xianggang', 'aomen','taiwan']
+  var provincesText = ['上海', '河北', '山西', '内蒙古', '辽宁', '吉林','黑龙江',  '江苏', '浙江', '安徽', '福建', '江西', '山东','河南', '湖北', '湖南', '广东', '广西', '海南', '四川', '贵州', '云南', '西藏', '陕西', '甘肃', '青海', '宁夏', '新疆', '北京', '天津', '重庆', '香港', '澳门','台湾']
+  var currentIdx = provincesText.indexOf(provinceName)
+  var name = provinces[currentIdx]
+  // 配置项
+  var options2 = {
+    series: [{
+      type: 'map',
+      map:name,
+      zoom:1,
+      roam:true,
+      scaleLimit:{min:0.8,max:4},
+      label: {
+        normal: {
+          show: true,
+          textStyle:{
+            color:"#999"
+          }
+        },   
+        emphasis: {
+          show: true,
+          textStyle:{
+            color:"#fff"
+          }
+        } 
+      },
+      itemStyle: {
+        normal: {
+          borderWidth: .5,
+          borderColor: '#555',
+          areaColor:"#323c48"
+        },
+        emphasis: {
+          borderWidth: .5,
+          borderColor: '',
+          areaColor:"#2a333d"
+        }
+      }
+    }]
+  }
+  $.get('json/' + name + '.json', function (geoJson) {
+    echarts.registerMap(name, geoJson)
+    chart.setOption(options2)
+  });
+}
+$(document).ready(function(){
+  showChina()
+})
+$('.back').on('click',function(){
+  showChina()
+})
+</script>
+</body>
+</html>
